@@ -1,6 +1,65 @@
 from rest_framework import serializers
 
-from cinema.models import Movie
+from cinema.models import (
+    Genre,
+    Actor,
+    CinemaHall,
+    Movie
+)
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=50)
+
+    def create(self, validated_data):
+        return Genre.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get("name", instance.name)
+        instance.save()
+        return instance
+
+
+class ActorSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    first_name = serializers.CharField(max_length=50)
+    last_name = serializers.CharField(max_length=50)
+
+    def create(self, validated_data):
+        return Actor.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.first_name = validated_data.get(
+            "first_name",
+            instance.first_name
+        )
+        instance.last_name = validated_data.get(
+            "last_name",
+            instance.last_name
+        )
+        instance.save()
+        return instance
+
+
+class CinemaHallSerializers(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(max_length=50)
+    rows = serializers.IntegerField()
+    seat_in_rows = serializers.IntegerField()
+
+    def create(self, validated_data):
+        return CinemaHall.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get("name", instance.name)
+        instance.rows = validated_data.get("rows", instance.rows)
+        instance.seat_in_rows = validated_data.get(
+            "seat_in_rows",
+            instance.seat_in_rows
+        )
+        instance.save()
+        return instance
 
 
 class MovieSerializer(serializers.Serializer):
@@ -8,6 +67,8 @@ class MovieSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     description = serializers.CharField()
     duration = serializers.IntegerField()
+    actors = serializers.CharField(max_length=50, required=False)
+    genres = serializers.CharField(max_length=50)
 
     def create(self, validated_data):
         return Movie.objects.create(**validated_data)
@@ -18,7 +79,7 @@ class MovieSerializer(serializers.Serializer):
             "description", instance.description
         )
         instance.duration = validated_data.get("duration", instance.duration)
-
+        instance.actors = validated_data.get("actors", instance.actors)
+        instance.genres = validated_data.get("genres", instance.genres)
         instance.save()
-
         return instance
