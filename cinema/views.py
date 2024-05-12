@@ -18,21 +18,26 @@ from cinema.serializers import (
     GenreSerializer,
     ActorSerializer,
     MovieSerializer,
-    CinemaHallSerializers
+    CinemaHallSerializer
 )
+
+
+class MovieViewSet(viewsets.ModelViewSet):
+    queryset = Movie.objects.all()
+    serializer_class = MovieSerializer
 
 
 class GenreList(APIView):
     def get(self, request) -> Response:
         genre = Genre.objects.all()
         serializer = GenreSerializer(genre, many=True)
-        return Response(serializer.data, status=HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request) -> Response:
         serializer = GenreSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.errors, status=HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class GenreDetail(APIView):
@@ -40,11 +45,13 @@ class GenreDetail(APIView):
         return get_object_or_404(Genre, pk=pk)
 
     def get(self, request, pk: int) -> Response:
-        serializer = GenreSerializer(self.get_object(pk))
+        genre = self.get_object(pk)
+        serializer = GenreSerializer(genre)
         return Response(serializer.data, status=HTTP_200_OK)
 
     def put(self, request, pk: int) -> Response:
-        serializer = GenreSerializer(self.get_object(pk=pk), data=request.data)
+        genre = self.get_object(pk)
+        serializer = GenreSerializer(genre, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=HTTP_200_OK)
@@ -92,6 +99,9 @@ class ActorDetail(
     def put(self, request, *args, **kwargs) -> Response:
         return self.update(request, *args, **kwargs)
 
+    def patch(self, request, *args, **kwargs) -> Response:
+        return self.partial_update(request, *args, **kwargs)
+
     def delete(self, request, *args, **kwargs) -> Response:
         return self.destroy(request, *args, **kwargs)
 
@@ -100,14 +110,9 @@ class CinemaHallViewSet(
     viewsets.GenericViewSet,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
-    mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
     mixins.DestroyModelMixin
 ):
     queryset = CinemaHall.objects.all()
-    serializer_class = CinemaHallSerializers
-
-
-class MovieViewSet(viewsets.ModelViewSet):
-    queryset = Movie.objects.all()
-    serializer_class = MovieSerializer
+    serializer_class = CinemaHallSerializer

@@ -7,7 +7,7 @@ class CinemaHall(models.Model):
     seats_in_row = models.IntegerField()
 
     def __str__(self) -> str:
-        return f"Cinema Hall: {self.name}"
+        return self.name
 
 
 class Actor(models.Model):
